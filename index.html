@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตรวจสอบใบเสนอราคา</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin: 5px; color: white;}
+        .btn-approve { background-color: #06C755; }
+        .btn-reject { background-color: #ff4d4f; }
+    </style>
+</head>
+<body>
+    <h2>ใบเสนอราคาของคุณ</h2>
+    
+    <div class="box">
+        <p><strong>เลขที่:</strong> QU-2026-001</p>
+        <p><strong>ยอดชำระ:</strong> 15,000 บาท</p>
+    </div>
+
+    <button class="btn btn-approve" onclick="sendAction('อนุมัติ')">อนุมัติ (Approve)</button>
+    <button class="btn btn-reject" onclick="sendAction('ปฏิเสธ')">ปฏิเสธ (Reject)</button>
+
+    <script>
+        // 1. ใส่ LIFF ID ของคุณตรงนี้
+        const myLiffId = "YOUR_LIFF_ID"; 
+
+        // 2. เริ่มต้นระบบ LIFF
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: myLiffId });
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                }
+            } catch (err) {
+                console.error('LIFF Init Error:', err);
+            }
+        }
+
+        // 3. ฟังก์ชันเมื่อลูกค้ากดปุ่ม
+        async function sendAction(action) {
+            try {
+                const profile = await liff.getProfile();
+                const userName = profile.displayName;
+
+                // ตรวจสอบว่าแอปเปิดใน LINE หรือเปิดผ่านเบราว์เซอร์
+                if (liff.isInClient()) {
+                    // ให้ส่งข้อความเข้าไปในแชทแทนลูกค้า
+                    await liff.sendMessages([
+                        {
+                            type: 'text',
+                            text: `ฉันขอ ${action} ใบเสนอราคา QU-2026-001`
+                        }
+                    ]);
+                    alert(`คุณได้ทำการ ${action} เรียบร้อยแล้ว`);
+                    liff.closeWindow(); // ปิดหน้าจอ LIFF
+                } else {
+                    alert(`ใช้งานบนเบราว์เซอร์: คุณได้ทำการ ${action} ใบเสนอราคา`);
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาด: ' + error);
+            }
+        }
+
+        initializeLiff();
+    </script>
+</body>
+</html>
